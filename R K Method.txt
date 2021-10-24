@@ -1,0 +1,147 @@
+//      R K METHOD 
+
+#include<stdio.h>
+#include<math.h>
+#include<string.h>
+#include <bits/stdc++.h>
+using namespace std;
+#define MAX 50
+
+char expression[MAX];
+int len;
+
+int precedence(char op)
+{
+  switch(op)
+  {
+      case '+':
+      case '-': return 1;
+      case '*': 
+      case '/': return 2;
+      case '^': return 3;
+      default : return 0;
+  }
+}
+
+double Operation(double a, double b, char op)
+{
+  switch(op)
+    {
+    case '+': return a + b;
+    case '-': return a - b;
+    case '*': return a * b;
+    case '/': return a / b;
+    case '^': return (double(pow(a,b)));
+          
+  }
+}
+
+
+double evaluate(double x, double y, string exp)
+{
+  int i;
+  
+  stack <double> values;
+  stack <char> ops;
+  
+  for(i = 0; i < len; i++)
+    {
+    if(exp[i] == ' ')
+      continue;
+    else if(exp[i] == '(')
+      ops.push(exp[i]);
+    else if(isdigit(exp[i]))
+    {
+      double val = 0;
+      while(i < len && 
+            isdigit(exp[i]))
+      {
+        val = (val*10) + (exp[i]-'0');
+        i++;
+      }
+      values.push(val);
+      i--;
+    }
+    else if(exp[i] == 'x')
+          values.push(x);
+    else if(exp[i] == 'y')
+          values.push(y);
+    else if(exp[i] == ')')
+    {
+      while(!ops.empty() && ops.top() != '(')
+      {
+        double val2 = values.top();
+        values.pop();
+        double val1 = values.top();
+        values.pop();
+        char op = ops.top();
+        ops.pop();  
+        values.push(Operation(val1, val2, op));
+      }
+      if(!ops.empty())
+      ops.pop();
+    }
+    else
+    {
+      while(!ops.empty() && precedence(ops.top())  >= precedence(exp[i])){
+        double val2 = values.top();
+        values.pop();
+        double val1 = values.top();
+        values.pop();
+        char op = ops.top();
+        ops.pop();  
+        values.push(Operation(val1, val2, op));
+      }
+      ops.push(exp[i]);
+    }
+  }
+  while(!ops.empty()){
+    double val2 = values.top();
+    values.pop();
+    double val1 = values.top();
+    values.pop();
+    char op = ops.top();
+    ops.pop();    
+    values.push(Operation(val1, val2, op));
+  }
+ 
+  return values.top();
+}
+
+int main()
+{
+    double k1, k2, k3, k4, y, y0, x0, h, x;
+    cout << "\n Question : If dy/dx = f(x,y) and y(x0)=y0, compute y(x).";
+    cout << "\n f(x,y) = ";
+    cin >> expression;
+    cout << "\n x0 = ";
+    cin >> x0;
+    cout << "\n y0 = ";
+    cin >> y0;
+    cout << "\n x = ";
+    cin >> x;
+      
+    
+    h = x - x0;
+    len = strlen(expression);
+    cout << "\n h = " << h << endl;
+    
+    k1 = h*evaluate(x0,y0,expression);
+    std::cout << std::setprecision(5) << "\n k1 = " <<k1;
+    
+    k2 = h*evaluate((x0+(h/2)),(y0+(k1/2)),expression);
+    std::cout << std::setprecision(5) << "\t k2 = " <<k2;
+    
+    k3 = h*evaluate((x0+(h/2)),(y0+(k2/2)),expression);
+    std::cout << std::setprecision(5) << "\t k3 = " <<k3;
+    
+    k4 = h*evaluate((x0+h),(y0+k3),expression);
+    std::cout << std::setprecision(5) << "\t k4 = " <<k4;
+    
+    y = y0 + ((k1 + (2*k2) + (2*k3) + k4)/6);
+    
+    std::cout << std::setprecision(5) << "\n\n y("<< x <<") = " << y;
+ 
+  
+    return 0;
+}
